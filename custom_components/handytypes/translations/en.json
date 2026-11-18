@@ -1,0 +1,90 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Handy Types",
+        "description": "This adds Divider and Spacer to the entity picker. Sections, text rows and web links can be added afterwards from the integration page."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Handy Types is already set up."
+    }
+  },
+  "config_subentries": {
+    "section": {
+      "entry_type": "Section",
+      "initiate_flow": {
+        "user": "Add section"
+      },
+      "step": {
+        "user": {
+          "title": "Add section",
+          "data": {
+            "label": "Heading"
+          }
+        },
+        "reconfigure": {
+          "title": "Edit section",
+          "data": {
+            "label": "Heading"
+          }
+        }
+      },
+      "abort": {
+        "reconfigure_successful": "Section updated."
+      }
+    },
+    "text": {
+      "entry_type": "Text row",
+      "initiate_flow": {
+        "user": "Add text row"
+      },
+      "step": {
+        "user": {
+          "title": "Add text row",
+          "data": {
+            "label": "Label",
+            "text": "Text"
+          }
+        },
+        "reconfigure": {
+          "title": "Edit text row",
+          "data": {
+            "label": "Label",
+            "text": "Text"
+          }
+        }
+      },
+      "abort": {
+        "reconfigure_successful": "Text row updated."
+      }
+    },
+    "weblink": {
+      "entry_type": "Web link",
+      "initiate_flow": {
+        "user": "Add web link"
+      },
+      "step": {
+        "user": {
+          "title": "Add web link",
+          "data": {
+            "label": "Label",
+            "url": "URL",
+            "icon": "Icon"
+          }
+        },
+        "reconfigure": {
+          "title": "Edit web link",
+          "data": {
+            "label": "Label",
+            "url": "URL",
+            "icon": "Icon"
+          }
+        }
+      },
+      "abort": {
+        "reconfigure_successful": "Web link updated."
+      }
+    }
+  }
+}
