@@ -19,8 +19,9 @@ Pick **Divider** from the list and you get the same result as:
 | Text row | `type: text` with a label and text | Add from the integration page |
 | Web link | `type: weblink` with a label, URL and icon | Add from the integration page |
 
-All entities have an `ht_` prefix in their entity ID (for example
-`sensor.ht_divider`), so typing `ht` in the entity picker filters down to them.
+All entities use the `ht.` prefix (for example `ht.divider`), so typing `ht` in the
+entity picker filters down to them. They show with clean names such as Divider and
+Spacer.
 
 ## Install
 
@@ -49,6 +50,8 @@ can be edited from the same page.
 - Works in the **Entities** card only. Other cards do not use row types.
 - The rows are swapped in when the card renders, so the entity must exist and the
   frontend module must be loaded (hard refresh after installing).
+- These are state-only entities: they can't be renamed or edited from the entity
+  settings page. Edit sections, text rows and web links from the integration page.
 - Editing an item reloads the integration; refresh the dashboard to see it.
 
 ## Licence

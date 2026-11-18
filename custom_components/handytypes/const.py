@@ -2,6 +2,9 @@
 
 DOMAIN = "handytypes"
 
+# Prefix of the entity IDs, so typing "ht" in the entity picker finds them
+STATE_DOMAIN = "ht"
+
 # Subentry types that take user input (each one becomes its own entity)
 TYPE_SECTION = "section"
 TYPE_TEXT = "text"
