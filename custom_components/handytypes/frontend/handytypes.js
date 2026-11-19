@@ -92,6 +92,11 @@ const urlToTapAction = (config) => {
   return rest;
 };
 
+// Browsers offer saved usernames, passwords and past searches in text boxes
+// they think are logins or search fields. An unrecognised autocomplete value
+// is the one setting browsers reliably leave alone, so use it on our boxes.
+const NO_AUTOFILL = { text: { autocomplete: "nope" } };
+
 // Make the pencil dialog for section and web link rows show plain text boxes
 const addRowFields = (editor) => {
   const config = editor._config;
@@ -129,13 +134,13 @@ const addRowFields = (editor) => {
 
   // A plain text box replaces the Name box, which is awkward for static text
   const schema = form.schema.map((field) =>
-    field.name === "name" ? { name: "name", selector: { text: {} } } : field
+    field.name === "name" ? { name: "name", selector: NO_AUTOFILL } : field
   );
   if (type === "weblink") {
     const nameIndex = schema.findIndex((field) => field.name === "name");
     schema.splice(nameIndex + 1, 0, {
       name: "url",
-      selector: { text: { type: "url" } },
+      selector: NO_AUTOFILL,
     });
   }
 
