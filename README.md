@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="custom_components/handytypes/brand/dark_logo@2x.png">
+    <img src="custom_components/handytypes/brand/logo@2x.png" alt="Handy Types" width="360">
+  </picture>
+</p>
+
 # Handy Types
 
 Adds the extra row types of the entities card as real entities, so you can pick
@@ -11,6 +18,8 @@ Pick **Divider** from the list and you get the same result as:
 
 ## What you get
 
+![The Handy Types entities in the entity picker](images/picker.png)
+
 | Entity | Same as | Set up on the row |
 | --- | --- | --- |
 | `ht.divider` | `type: divider` | Nothing to set up |
@@ -20,6 +29,10 @@ Pick **Divider** from the list and you get the same result as:
 
 All entities use the `ht.` prefix, so typing `ht` in the entity picker filters down
 to them. You can add the same entity as many times as you like.
+
+Here is how they look in an Entities card:
+
+![A divider, section, spacer and web link in an Entities card](images/result.png)
 
 ## Install
 
