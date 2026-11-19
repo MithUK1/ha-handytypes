@@ -8,19 +8,13 @@ from homeassistant.components.frontend import add_extra_js_url
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.util import slugify
 
 from .const import (
     ATTR_TYPE,
-    CONF_ICON,
-    CONF_LABEL,
-    CONF_TEXT,
-    CONF_URL,
     DOMAIN,
     FRONTEND_URL,
+    ROW_TYPES,
     STATE_DOMAIN,
-    TYPE_DIVIDER,
-    TYPE_SPACER,
 )
 
 
@@ -37,50 +31,23 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Publish a state for every row type so they show up in the entity picker."""
+    """Publish one state per row type so they show up in the entity picker."""
+    # Earlier versions stored items as subentries, which are no longer used
+    for subentry_id in list(entry.subentries):
+        hass.config_entries.async_remove_subentry(entry, subentry_id)
+
     published: list[str] = []
-
-    def publish(object_id: str, row_type: str, name: str, extra: dict | None = None):
-        """Write one state, adding a number if the ID is already taken."""
-        entity_id = f"{STATE_DOMAIN}.{object_id}"
-        count = 2
-        while entity_id in published:
-            entity_id = f"{STATE_DOMAIN}.{object_id}_{count}"
-            count += 1
-
+    for row_type, (name, icon) in ROW_TYPES.items():
+        entity_id = f"{STATE_DOMAIN}.{row_type}"
         hass.states.async_set(
             entity_id,
             row_type,
-            {"friendly_name": name, ATTR_TYPE: row_type, **(extra or {})},
+            {"friendly_name": name, "icon": icon, ATTR_TYPE: row_type},
         )
         published.append(entity_id)
 
-    # Fixed rows that need no input
-    publish(TYPE_DIVIDER, TYPE_DIVIDER, "Divider")
-    publish(TYPE_SPACER, TYPE_SPACER, "Spacer")
-
-    # Items the user added through the integration page
-    for subentry in entry.subentries.values():
-        label = subentry.data[CONF_LABEL]
-
-        # Only pass on the fields that belong to this type
-        extra = {
-            key: subentry.data[key]
-            for key in (CONF_TEXT, CONF_URL, CONF_ICON)
-            if subentry.data.get(key)
-        }
-        publish(
-            f"{subentry.subentry_type}_{slugify(label)}",
-            subentry.subentry_type,
-            label,
-            extra,
-        )
-
     # Remember what we published so it can be removed on unload
     entry.runtime_data = published
-
-    # Reload when a section/text/weblink item is added, edited or removed
-    entry.async_on_unload(entry.add_update_listener(_async_reload_entry))
     return True
 
 
@@ -89,8 +56,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     for entity_id in entry.runtime_data:
         hass.states.async_remove(entity_id)
     return True
-
-
-async def _async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Reload the entry after its subentries change."""
-    await hass.config_entries.async_reload(entry.entry_id)

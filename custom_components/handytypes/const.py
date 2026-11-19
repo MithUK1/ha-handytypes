@@ -5,20 +5,13 @@ DOMAIN = "handytypes"
 # Prefix of the entity IDs, so typing "ht" in the entity picker finds them
 STATE_DOMAIN = "ht"
 
-# Subentry types that take user input (each one becomes its own entity)
-TYPE_SECTION = "section"
-TYPE_TEXT = "text"
-TYPE_WEBLINK = "weblink"
-
-# Fixed types created automatically with the integration (no input needed)
-TYPE_DIVIDER = "divider"
-TYPE_SPACER = "spacer"
-
-# Config keys used by the subentry forms
-CONF_LABEL = "label"
-CONF_TEXT = "text"
-CONF_URL = "url"
-CONF_ICON = "icon"
+# Row types offered as entities: type -> (display name, picker icon)
+ROW_TYPES = {
+    "divider": ("Divider", "mdi:minus"),
+    "spacer": ("Spacer", "mdi:arrow-expand-vertical"),
+    "section": ("Section", "mdi:format-title"),
+    "weblink": ("Web link", "mdi:link-variant"),
+}
 
 # State attribute read by the frontend module to decide how to draw a row
 ATTR_TYPE = "ht_type"

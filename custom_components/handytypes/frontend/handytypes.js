@@ -5,6 +5,9 @@
  * attribute. When the entities card is given one of them, this module swaps
  * the entity row for the matching row type, so picking "Divider" from the
  * entity list behaves the same as writing "- type: divider" in YAML.
+ *
+ * Section and web link rows take their text from the row's own Name field,
+ * which is editable with the pencil icon in the card editor.
  */
 
 const ATTR_TYPE = "ht_type";
@@ -28,6 +31,12 @@ if (!customElements.get("ht-spacer-row")) {
 // Latest hass object, read from the root Home Assistant element
 const getHass = () => document.querySelector("home-assistant")?.hass;
 
+// Use the name set on the row if it is plain text, otherwise the entity name
+const rowName = (row, stateObj) =>
+  typeof row === "object" && typeof row.name === "string" && row.name
+    ? row.name
+    : stateObj.attributes.friendly_name;
+
 // Turn an entity row into the real row config, or return it untouched
 const convertRow = (row) => {
   const entityId = typeof row === "string" ? row : row && row.entity;
@@ -37,7 +46,7 @@ const convertRow = (row) => {
   const attrs = stateObj?.attributes;
   if (!attrs || !attrs[ATTR_TYPE]) return row;
 
-  const name = stateObj.attributes.friendly_name;
+  const options = typeof row === "object" ? row : {};
 
   switch (attrs[ATTR_TYPE]) {
     case "divider":
@@ -45,11 +54,14 @@ const convertRow = (row) => {
     case "spacer":
       return { type: "custom:ht-spacer-row" };
     case "section":
-      return { type: "section", label: name };
-    case "text":
-      return { type: "text", name, text: attrs.text, icon: attrs.icon };
+      return { type: "section", label: rowName(row, stateObj) };
     case "weblink":
-      return { type: "weblink", name, url: attrs.url, icon: attrs.icon };
+      return {
+        type: "weblink",
+        name: rowName(row, stateObj),
+        url: options.url,
+        icon: options.icon || attrs.icon,
+      };
     default:
       return row;
   }
