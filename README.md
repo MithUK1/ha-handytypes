@@ -25,7 +25,7 @@ Pick **Divider** from the list and you get the same result as:
 | `ht.divider` | `type: divider` | Nothing to set up |
 | `ht.spacer` | An empty gap between rows | Nothing to set up |
 | `ht.section` | `type: section` | Name is the heading |
-| `ht.weblink` | `type: weblink` | Name, icon and `url` |
+| `ht.weblink` | `type: weblink` | Name, URL and icon |
 
 All entities use the `ht.` prefix, so typing `ht` in the entity picker filters down
 to them. You can add the same entity as many times as you like.
@@ -53,10 +53,13 @@ For a manual install, copy `custom_components/handytypes` into your
 1. Edit an **Entities** card.
 2. Add an entity, type `ht` to filter, and choose Divider, Spacer, Section or Web
    link.
-3. For a section or web link, click the pencil icon on the row and set the
-   **Name**. A web link can also take an **Icon**.
+3. For a section or web link, click the pencil icon on the row. Set the **Name**
+   (the heading or link text). A web link also has a **URL** box and can take an
+   **Icon**.
 
-A web link needs its address added in the code editor, on the row:
+Until a URL is set, a web link row shows but does not go anywhere.
+
+If you prefer YAML, the same row looks like this:
 
 ```yaml
 - entity: ht.weblink
@@ -69,6 +72,9 @@ A web link needs its address added in the code editor, on the row:
 - Works in the **Entities** card only. Other cards do not use row types.
 - The rows are swapped in when the card renders, so the frontend module must be
   loaded (hard refresh after installing).
+- The URL box is added to the row editor by the frontend module. If a future Home
+  Assistant update changes that editor, the box may disappear; the YAML form above
+  always works.
 - These are state-only entities: they can't be renamed from the entity settings
   page.
 

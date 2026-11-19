@@ -59,7 +59,8 @@ const convertRow = (row) => {
       return {
         type: "weblink",
         name: rowName(row, stateObj),
-        url: options.url,
+        // A web link row errors without a url, so use a placeholder until set
+        url: options.url || "#",
         icon: options.icon || attrs.icon,
       };
     default:
@@ -77,5 +78,42 @@ customElements.whenDefined("hui-entities-card").then(() => {
       config = { ...config, entities: config.entities.map(convertRow) };
     }
     return originalSetConfig.call(this, config);
+  };
+});
+
+// Add a URL box to the row editor (the pencil dialog) for web link rows
+const addUrlField = (editor) => {
+  const entityId = editor._config?.entity;
+  const attrs = getHass()?.states?.[entityId]?.attributes;
+  if (!attrs || attrs[ATTR_TYPE] !== "weblink") return;
+
+  const form = editor.shadowRoot?.querySelector("ha-form");
+  if (!form || !Array.isArray(form.schema)) return;
+  if (form.schema.some((field) => field.name === "url")) return;
+
+  // Put the URL box straight after the Name box
+  const schema = [...form.schema];
+  const nameIndex = schema.findIndex((field) => field.name === "name");
+  schema.splice(nameIndex + 1, 0, {
+    name: "url",
+    selector: { text: { type: "url" } },
+  });
+
+  // Give the new box a readable label, leave the others as they are
+  const originalLabel = form.computeLabel;
+  form.computeLabel = (field, ...rest) =>
+    field.name === "url" ? "URL" : originalLabel?.(field, ...rest);
+
+  form.schema = schema;
+};
+
+// The row editor is loaded on demand, so wait for it to be registered
+customElements.whenDefined("hui-generic-entity-row-editor").then(() => {
+  const RowEditor = customElements.get("hui-generic-entity-row-editor");
+  const originalUpdated = RowEditor.prototype.updated;
+
+  RowEditor.prototype.updated = function (changed) {
+    originalUpdated?.call(this, changed);
+    addUrlField(this);
   };
 });
