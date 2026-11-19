@@ -24,8 +24,8 @@ Pick **Divider** from the list and you get the same result as:
 | --- | --- | --- |
 | `ht.divider` | `type: divider` | Nothing to set up |
 | `ht.spacer` | An empty gap between rows | Nothing to set up |
-| `ht.section` | `type: section` | Name is the heading |
-| `ht.weblink` | `type: weblink` | Name, URL and icon |
+| `ht.section` | `type: section` | Heading text |
+| `ht.weblink` | `type: weblink` | Text, URL and icon |
 
 All entities use the `ht.` prefix, so typing `ht` in the entity picker filters down
 to them. You can add the same entity as many times as you like.
@@ -53,18 +53,20 @@ For a manual install, copy `custom_components/handytypes` into your
 1. Edit an **Entities** card.
 2. Add an entity, type `ht` to filter, and choose Divider, Spacer, Section or Web
    link.
-3. For a section or web link, click the pencil icon on the row. Set the **Name**
-   (the heading or link text). A web link also has a **URL** box and can take an
-   **Icon**.
+3. For a section or web link, click the pencil icon on the row. A section has a
+   **Heading** box. A web link has a **Text** box (what the link says), a **URL**
+   box and an **Icon**.
 
 Until a URL is set, a web link row shows but does not go anywhere.
 
-If you prefer YAML, the same row looks like this:
+If you prefer YAML, the same web link looks like this:
 
 ```yaml
 - entity: ht.weblink
   name: My link
-  url: https://example.com
+  tap_action:
+    action: url
+    url_path: https://example.com
 ```
 
 ## Notes
@@ -75,6 +77,8 @@ If you prefer YAML, the same row looks like this:
 - The URL box is added to the row editor by the frontend module. If a future Home
   Assistant update changes that editor, the box may disappear; the YAML form above
   always works.
+- The address is saved as a URL tap action on the row. A plain `url:` key is not
+  accepted by the visual card editor, so use the form above if you write YAML.
 - These are state-only entities: they can't be renamed from the entity settings
   page.
 

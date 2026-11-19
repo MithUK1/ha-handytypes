@@ -59,8 +59,10 @@ const convertRow = (row) => {
       return {
         type: "weblink",
         name: rowName(row, stateObj),
-        // A web link row errors without a url, so use a placeholder until set
-        url: options.url || "#",
+        // The address lives in tap_action, which the card editor accepts. A plain
+        // url key is still honoured for rows written by hand in YAML.
+        // A web link row errors without a url, so use a placeholder until set.
+        url: options.tap_action?.url_path || options.url || "#",
         icon: options.icon || attrs.icon,
       };
     default:
@@ -81,28 +83,66 @@ customElements.whenDefined("hui-entities-card").then(() => {
   };
 });
 
-// Add a URL box to the row editor (the pencil dialog) for web link rows
-const addUrlField = (editor) => {
-  const entityId = editor._config?.entity;
-  const attrs = getHass()?.states?.[entityId]?.attributes;
-  if (!attrs || attrs[ATTR_TYPE] !== "weblink") return;
+// The card editor rejects unknown keys on a row, so the URL box saves the
+// address as a "url" tap action, which is a key every row is allowed to have
+const urlToTapAction = (config) => {
+  const { url, ...rest } = config;
+  if (url) return { ...rest, tap_action: { action: "url", url_path: url } };
+  if (rest.tap_action?.action === "url") delete rest.tap_action;
+  return rest;
+};
+
+// Make the pencil dialog for section and web link rows show plain text boxes
+const addRowFields = (editor) => {
+  const config = editor._config;
+  const type = getHass()?.states?.[config?.entity]?.attributes?.[ATTR_TYPE];
+  if (type !== "weblink" && type !== "section") return;
 
   const form = editor.shadowRoot?.querySelector("ha-form");
   if (!form || !Array.isArray(form.schema)) return;
-  if (form.schema.some((field) => field.name === "url")) return;
 
-  // Put the URL box straight after the Name box
-  const schema = [...form.schema];
-  const nameIndex = schema.findIndex((field) => field.name === "name");
-  schema.splice(nameIndex + 1, 0, {
-    name: "url",
-    selector: { text: { type: "url" } },
-  });
+  // Convert the URL box back into a tap action before the editor saves it
+  if (!editor._htWrapped) {
+    const dispatch = editor.dispatchEvent.bind(editor);
+    editor.dispatchEvent = (event) => {
+      if (event.type === "config-changed" && event.detail?.config) {
+        event = new CustomEvent("config-changed", {
+          detail: { config: urlToTapAction(event.detail.config) },
+          bubbles: true,
+          composed: true,
+        });
+      }
+      return dispatch(event);
+    };
+    editor._htWrapped = true;
+  }
 
-  // Give the new box a readable label, leave the others as they are
+  // Show the saved address in the URL box
+  if (type === "weblink") {
+    form.data = { ...config, url: config.tap_action?.url_path ?? "" };
+  }
+
+  // Only swap the fields once
+  if (form.schema.some((field) => field.name === "name" && field.selector?.text)) {
+    return;
+  }
+
+  // A plain text box replaces the Name box, which is awkward for static text
+  const schema = form.schema.map((field) =>
+    field.name === "name" ? { name: "name", selector: { text: {} } } : field
+  );
+  if (type === "weblink") {
+    const nameIndex = schema.findIndex((field) => field.name === "name");
+    schema.splice(nameIndex + 1, 0, {
+      name: "url",
+      selector: { text: { type: "url" } },
+    });
+  }
+
+  const labels = { name: type === "weblink" ? "Text" : "Heading", url: "URL" };
   const originalLabel = form.computeLabel;
   form.computeLabel = (field, ...rest) =>
-    field.name === "url" ? "URL" : originalLabel?.(field, ...rest);
+    labels[field.name] ?? originalLabel?.(field, ...rest);
 
   form.schema = schema;
 };
@@ -114,6 +154,6 @@ customElements.whenDefined("hui-generic-entity-row-editor").then(() => {
 
   RowEditor.prototype.updated = function (changed) {
     originalUpdated?.call(this, changed);
-    addUrlField(this);
+    addRowFields(this);
   };
 });
